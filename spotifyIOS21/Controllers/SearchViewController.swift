@@ -9,17 +9,19 @@ import UIKit
 import WebKit
 
 class SearchViewController: UIViewController {
+    let searchBar = UISearchBar()
+
     
-    private lazy var searchBar: UISearchBar = {
-        let view = UISearchBar()
-        view.placeholder = "What do you want to listen to?"
-        view.keyboardType = .default
-        view.tintColor = UIColor.white
-        view.keyboardAppearance = .dark
-        view.searchTextField.font = .monospacedDigitSystemFont(ofSize: 15, weight: .semibold)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
+//    let searchController = UISearchController(searchResultsController: nil)
+//    private var searchBar: UISearchBar = {
+//        let view = UISearchBar()
+//        view.placeholder = "What do you want to listen to?"
+//        view.keyboardType = .default
+//        view.tintColor = UIColor.white
+//        view.keyboardAppearance = .dark
+//        view.searchTextField.font = .monospacedDigitSystemFont(ofSize: 15, weight: .semibold)
+//        return view
+//    }()
     
     private let tableView: UITableView = {
         let view = UITableView()
@@ -35,24 +37,43 @@ class SearchViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = UIColor(red: 25/255, green: 25/255, blue: 25/255, alpha: 1.0)
         setup()
+        
+        searchBar.delegate = self
+
+                // Добавьте searchBar в statusBar
+                if let navigationBar = self.navigationController?.navigationBar {
+                    navigationBar.addSubview(searchBar)
+                    searchBar.translatesAutoresizingMaskIntoConstraints = false
+                    NSLayoutConstraint.activate([
+                        searchBar.topAnchor.constraint(equalTo: navigationBar.topAnchor),
+                        searchBar.leadingAnchor.constraint(equalTo: navigationBar.leadingAnchor),
+                        searchBar.trailingAnchor.constraint(equalTo: navigationBar.trailingAnchor),
+                        searchBar.heightAnchor.constraint(equalToConstant: 44) // Вы можете настроить высоту по своему усмотрению
+                    ])
+                }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationItem.hidesBackButton = true
     }
     
     private func setup() {
         setupSubviews()
         setupConstraints()
         addDelegates()
-        changeSearchBarColor()
+//        changeSearchBarColor()
     }
     
     private func setupSubviews() {
         view.addSubview(tableView)
-        view.addSubview(searchBar)
     }
     
     private func setupConstraints() {
-        navigationItem.titleView = searchBar
+//        navigationItem.searchController = searchController
+//        navigationItem.hidesSearchBarWhenScrolling = false
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 25),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
@@ -60,7 +81,7 @@ class SearchViewController: UIViewController {
     }
     
     private func addDelegates() {
-        searchBar.delegate = self
+//        searchBar.delegate = self
         tableView.dataSource = self
         tableView.delegate = self
     }
@@ -123,5 +144,6 @@ extension SearchViewController: UITableViewDelegate {
         }
         selectedIndexPath = indexPath
         tableView.deselectRow(at: indexPath, animated: true)
+        
     }
 }

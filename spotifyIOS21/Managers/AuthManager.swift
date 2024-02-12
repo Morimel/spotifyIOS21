@@ -1,12 +1,4 @@
-//
-//  AuthManager.swift
-//  spotifyAnalogSwift
-//
-//  Created by Isa Melsov on 31/1/24.
-//
-
 import Foundation
-
 final class AuthManager {
     
     static let shared = AuthManager()
@@ -52,7 +44,36 @@ final class AuthManager {
         return currentDate.addingTimeInterval(fiveMinutes) >= expirationDate
     }
     
-    public  func exchangeCodeForToken(code: String, completion: @escaping ((Bool) -> Void)) {
+    
+    func search(q: String) {
+        guard let url = URL(string: "https://api.spotify.com/v1/search?q=see+you&type=track") else {
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        let token = "BQBhuPt-3YfxjB-arpayCN0wbe2XTNziacY1xDMd_8CynnMyavT2c0VvqD9RBVH8ctA3X09nNqvdrj47jmnOdqi4Lv6IGJj4eOCncYB-wZ4-ycKjdJtDiyzoBolLYOIbNQmZLmny3Eo4OkEjpS4YZExDFgx8mJwpBxbbP-NYxO3xPzuLqpI6uGW5C-iCpiuMYkigprZBSic5R39sd0WwLSuKylovtnC6fXb3LGhN9lzX-akmxavauP57YRPs2onf9ZVlA5YXjKZdU5dSm6-ra39scXHUwAABRibb9kmlBTf0eG9xbM0kyA"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        URLSession.shared.dataTask(with: request) { data, reponse, error in
+            guard error == nil else {
+                return
+            }
+            
+            guard let data = data else {
+                return
+            }
+            
+            do {
+                let model = try JSONDecoder().decode(Tracks.self, from: data)
+                print(model.tracks.items[0].trackNumber)
+                print(model.tracks.items[0].name)
+            } catch {
+                print(error)
+            }
+        }.resume()
+    }
+    
+    public func exchangeCodeForToken(code: String, completion: @escaping ((Bool) -> Void)) {
         guard let url = URL(string: Constants.tokenAPIURL) else {
             return
         }
@@ -63,7 +84,7 @@ final class AuthManager {
             URLQueryItem(name: "code", value: code),
             URLQueryItem(name: "redirect_uri", value: Constants.redirectURI)
         ]
-          
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
@@ -108,7 +129,7 @@ final class AuthManager {
             URLQueryItem(name: "grant_type", value: "refresh_token"),
             URLQueryItem(name: "redirect_uri", value: refreshToken)
         ]
-          
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
@@ -145,5 +166,55 @@ final class AuthManager {
             UserDefaults.standard.setValue(refresh_token, forKey: "refresh_token")
         }
         UserDefaults.standard.setValue(Date().addingTimeInterval(TimeInterval(result.expires_in)), forKey: "expirationDate")
+    }
+    
+    func refreshAccessToken() {
+        guard let refreshToken = self.refreshToken else {
+            return
+        }
+        
+        guard let url = URL(string: "https://accounts.spotify.com/api/token") else {
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        let clientID = Constants.clientID
+        let clientSecret = Constants.clientSecret
+        
+        let credentials = "\(clientID):\(clientSecret)"
+        let credentialsData = credentials.data(using: .utf8)?.base64EncodedString() ?? ""
+        
+        request.addValue("Basic \(credentialsData)", forHTTPHeaderField: "Authorization")
+        
+        let bodyParameters = "grant_type=refresh_token&refresh_token=\(refreshToken)"
+        request.httpBody = bodyParameters.data(using: .utf8)
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error refreshing token: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let data = data else {
+                print("No data received")
+                return
+            }
+            
+            do {
+                let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                let result = try JSONDecoder().decode(AuthResponse.self, from: data)
+                self.cacheToken(result: result)
+                                    if let accessToken = json?["access_token"] as? String {
+                                        print("Refreshed Access Token: \(accessToken)")
+                                        // Используйте новый Access Token для ваших запросов к Spotify API
+                                    }
+            } catch {
+                print("Error parsing JSON: \(error.localizedDescription)")
+            }
+        }
+        
+        task.resume()
     }
 }

@@ -1,15 +1,8 @@
-//
-//  AuthViewController.swift
-//  spotifyAnalogSwift
-//
-//  Created by Isa Melsov on 31/1/24.
-//
-
 import UIKit
 import WebKit
 
 class AuthViewController: UIViewController, WKNavigationDelegate {
-    
+
     private let webView: WKWebView = {
         let prefs = WKWebpagePreferences()
         prefs.allowsContentJavaScript = true
@@ -18,7 +11,7 @@ class AuthViewController: UIViewController, WKNavigationDelegate {
         let webView = WKWebView(frame: .zero, configuration: config)
         return webView
     }()
-    
+
     public var completionhandler: ((Bool) -> Void)?
 
     override func viewDidLoad() {
@@ -37,7 +30,7 @@ class AuthViewController: UIViewController, WKNavigationDelegate {
         super.viewDidLayoutSubviews()
         webView.frame = view.bounds
     }
-    
+
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         guard let url = webView.url else {
             return
@@ -54,3 +47,4 @@ class AuthViewController: UIViewController, WKNavigationDelegate {
         }
     }
 }
+

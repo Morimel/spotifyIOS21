@@ -1,14 +1,7 @@
-//
-//  WelcomeViewController.swift
-//  spotifyAnalogSwift
-//
-//  Created by Isa Melsov on 31/1/24.
-//
-
 import UIKit
 
 class WelcomeViewController: UIViewController {
-    
+
     private let signInButton: UIButton = {
         let view = UIButton()
         view.backgroundColor = .white
@@ -27,7 +20,7 @@ class WelcomeViewController: UIViewController {
         signInButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -30).isActive = true
         signInButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
     }
-    
+
     @objc private func didTapSignIn() {
         let vc = AuthViewController()
         vc.completionhandler = { [weak self] success in
@@ -38,7 +31,7 @@ class WelcomeViewController: UIViewController {
         vc.navigationItem.largeTitleDisplayMode = .never
         navigationController?.pushViewController(vc, animated: true)
     }
-    
+
     private func handleSignIn(success: Bool) {
         guard success else {
             let alert = UIAlertController(title: "Oй", message: "Что-то пошло не так", preferredStyle: .alert)
@@ -48,6 +41,6 @@ class WelcomeViewController: UIViewController {
         }
         let mainTabBarVC = SearchViewController()
         self.navigationController?.pushViewController(mainTabBarVC, animated: true)
-//        present(mainTabBarVC, animated: true)
     }
 }
+
