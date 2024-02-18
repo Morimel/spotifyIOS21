@@ -64,11 +64,11 @@ final class AuthManager {
             }
             
             do {
-                let model = try JSONDecoder().decode(Tracks.self, from: data)
-                print(model.tracks.items[0].trackNumber)
-                print(model.tracks.items[0].name)
-            } catch {
-                print(error)
+//                let model = try JSONDecoder().decode(Tracks.self, from: data)
+//                print(model.tracks.items[0].trackNumber)
+//                print(model.tracks.items[0].name)
+//            } catch {
+//                print(error)
             }
         }.resume()
     }

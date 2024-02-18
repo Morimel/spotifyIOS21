@@ -16,6 +16,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let window = UIWindow(windowScene: windowScene)
         
+        SearchManager.sharedS.queryS()
+                
         AuthManager.shared.refreshAccessToken()
         
         AuthManager.shared.refreshIfNeeded { result in
@@ -27,7 +29,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         UserDefaults.standard.string(forKey: "access_token")
         
         if AuthManager.shared.isSignedIn {
-            window.rootViewController = SearchViewController()
+            window.rootViewController = TabBarViewController()
         } else {
             let navVc = UINavigationController(rootViewController: WelcomeViewController ())
 //            navVc.navigationBar.prefersLargeTitles = true
